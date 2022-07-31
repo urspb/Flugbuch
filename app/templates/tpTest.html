@@ -1,0 +1,40 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}TimepickerTest{% endblock %}
+
+{% block head %}
+  {{ super() }}
+    <link type="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1>Hello, TimePicker</h1>
+    <div class="row">
+      <div class='col-sm-6'>
+        {{ wtf.quick_form(form) }}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
+  <script type="text/javascript">
+    $(function () {$('#datepick').timepicker({
+            timeFormat: 'HH:mm',
+            interval: 10,
+            minTime: '10:00',
+            maxTime: '23:00',
+            defaultTime: '{{stime.strftime('%H:%M')}}',
+            dynamic: true,
+            dropdown: true,
+            scrollbar: true
+        }).css("width", "5em");
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>{{ _('Pilotenübersicht')}}</h1>
+    <h4> {{ _('für %(username)s vom ', username=current_user.first_name) }} {{ todate }}</h4>
+{% if pLogs|count==0 %}
+    Heute keine Einträge für {{ current_user.first_name }}.
+{% else %}
+    <p>Heute {{  pLogs|count }} Einträge für {{ current_user.first_name }}.</br></p>
+
+    <table class="table">
+        <tr>
+            <th>kommt  </th>
+            <th>geht  </th>
+            <th>Flugleiter  </th>
+        </tr>
+    {% for piLog in pLogs %}
+        <tr>
+            <td>
+                {{ piLog.start.strftime('%H:%M') }}
+            </td>
+            <td>
+                {% if piLog.stop is not none %}
+                    {{ piLog.stop.strftime('%H:%M')  }}
+                {% endif %}
+            </td>
+            <td>
+                {% if piLog.flugleiter %}
+                  X
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+   <h4>  Heutige Meldungen von {{ current_user.first_name }}: </h4>
+{% if pPosts|count==0 %}
+    <p>Noch keine.</p>
+{% else %}
+    <table class="table">
+        <tr>
+            <th>Zeit  </th>
+            <th>Meldung  </th>
+        </tr>
+    {% for pPost in pPosts %}
+        <tr>
+            <td>
+                {{ pPost.timestamp.strftime('%H:%M') }}
+            </td>
+            <td>
+               <pre>{{ pPost.body }}</pre>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+
+{% endif %}
+<br/>
+   <h4>  Wer insgesamt da ist: </h4>
+{% if oLogs|count<=-1 %}
+    <p>Sonst Niemand.</p>
+{% else %}
+    <table class="table">
+        <tr>
+            <th>Ab</th>
+            <th>Name</th>
+            <th>Flugleiter</th>
+        </tr>
+    {% for oLog in oLogs %}
+        <tr>
+            <td>
+                {{ oLog.start.strftime('%H:%M') }}
+            </td>
+            <td>
+               {{ oLog.pilot.first_name }} {{ oLog.pilot.last_name }}
+            </td>
+           <td>
+                {% if oLog.flugleiter %}
+                  X
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+    <p><b>Hinweis:</b> Andere Piloten können
+    {% if not current_user.sichtbar %}
+        <b>nicht</b>
+    {% endif %}
+        sehen, ob Du da bist. (<a href="{{ url_for('main.edit_profile') }}">{{ _('Ändern?') }}</a>)<br></p>
+
+{% endif %}
+    <h4>Heutige Meldungen von anderen Piloten:</h4>
+     <table  class="table">
+    <tr>
+    <th>Uhrzeit</th>
+    <th>Ereignis</th>
+    </tr>
+    {% for msg in posts %}
+    <tr>
+    <td>
+        {{ msg.timestamp.strftime('%H:%M')  }}
+    </td>
+      <td>
+        {{ msg.body }} (von {{ msg.author.first_name }} {{ msg.author.last_name }})
+      </td>
+    {% endfor %}
+    </table>
+
+{% endblock %}

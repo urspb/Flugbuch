@@ -1,0 +1,11 @@
+{% block app_content -%}
+{#{% filter markdown %}#}
+# Tagesbericht für {{ day }}
+
+|| Name || kommt || geht  ||
+{% for piLog in pLogs -%}
+    | {{ piLog.pilot.first_name }} {{ piLog.pilot.last_name }} | {{ piLog.start.strftime('%H:%M')  }} | {{ piLog.stop.strftime('%H:%M')  }} |
+{% endfor %}
+
+{#{% endfilter %}#}
+{% endblock -%}

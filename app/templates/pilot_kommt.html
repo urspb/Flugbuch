@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block app_content %}
+    <h1>{{ _('Anmeldung Pilot') }}</h1>
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+
+{#{% include  "timePicker2.html" %}#}
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/timepicker@1.13.18/jquery.timepicker.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/timepicker@1.13.18/jquery.timepicker.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(function () {$('#datepick').timepicker({
+            'scrollDefault': 'now',
+            timeFormat: 'H:i',
+            show2400: true,
+            minTime: '09:00',
+            maxTime: '{{ sunset }}',
+            step: 10,
+            forceRoundTime: true,
+            {#dropdown: true,#}
+            {#scrollbar: true#}
+        }).css("width", "5em");
+    });
+  </script>
+
+{% endblock %}
+
+

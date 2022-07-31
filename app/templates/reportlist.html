@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>Verfügbare Tagesberichte</h1>
+{% if days|count==0 %}
+    Noch keine Tagesberichte .
+{% else %}
+    <table  width="100pt" class="table table-sm">
+        <tr>
+            <th>Datum Tagesbericht  </th>
+            <th>Anzahl Piloten  </th>
+        </tr>
+    {% for day in days %}
+        <tr>
+            <td>
+                <a href="report/{{ day["day"] }} "  target="_blank">  {{ day["day"] }} </a>
+            </td>
+            <td>
+               {{ day["pltanz"] }}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+{% endblock %}
+

@@ -1,0 +1,90 @@
+{% extends 'bootstrap/base.html' %}
+{% block styles %}
+{{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='pilot.css')}}">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
+{% endblock %}
+{% block title %}
+    {% if title %}{{ title }} - {{ g.site_prefix }} Flugbuch {% else %}{{ g.site_prefix }} Tagesbericht {{ day }}{% endif %}
+{% endblock %}
+
+{% block content %}
+    {% block app_content %}
+    <div class="container">
+    <div style="text-align:center;">
+        <h1>{{ g.site_prefix }} Tagesbericht für den <br> {{ day }}</h1>
+    </div>
+    <h2>Piloten:</h2>
+    <table  class="table">
+    <tr>
+    <th>Name</th>
+    <th>von - bis</th>
+    </tr>
+    {#{% set akt_id = -1 %}#}
+
+    {% for piLog in pLogs %}
+    <tr>
+    {% if  piLog.start <= piLog.stop %}
+      <td>
+          {% if piLog.user_id %}
+        {{ piLog.pilot.first_name }} {{ piLog.pilot.last_name }}
+          {% endif %}
+      </td>
+    <td>
+        {{ piLog.start.strftime('%H:%M')  }} - {{ piLog.stop.strftime('%H:%M')  }}
+    </td>
+    {% endif %}
+{#    <td>#}
+{#        {{ piLog.user_id  }}#}
+{#    </td>#}
+    </tr>
+    {% endfor %}
+    </table>
+    <h2>Flugleiter:</h2>
+    <table  class="table">
+    <tr>
+    <th>Name</th>
+    <th>von - bis</th>
+    </tr>
+    {% for piLog in fLogs %}
+    <tr>
+      <td>
+          {% if piLog.user_id %}
+        {{ piLog.pilot.first_name }} {{ piLog.pilot.last_name }}
+          {% endif %}
+      </td>
+    <td>
+        {{ piLog.start.strftime('%H:%M')  }} - {{ piLog.stop.strftime('%H:%M')  }}
+    </td>
+{#    <td>#}
+{#        {{ piLog.user_id  }}#}
+{#    </td>#}
+    {% endfor %}
+    </table>
+
+    <h2>Meldungen:</h2>
+     <table  class="table">
+    <tr>
+    <th>Uhrzeit</th>
+    <th>Ereignis</th>
+    </tr>
+    {% for msg in pPosts %}
+    <tr>
+    <td>
+        {{ msg.timestamp.strftime('%H:%M')  }}
+    </td>
+      <td>
+        {{ msg.body }} (von {{ msg.author.first_name }} {{ msg.author.last_name }})
+      </td>
+{#    <td>#}
+{#        {{ piLog.user_id  }}#}
+{#    </td>#}
+    {% endfor %}
+    </table>
+    <h3>Hinweis:</h3>
+    <p>Sonnenuntergang am  {{ day }} war um
+        {{ sunset }} Uhr.</p>
+    <div class="footer"><hr><p>Erstellt mit "Das Flugbuch" (Version: {{ g.fbversion }})</p></div>
+    </div>
+    {% endblock %}
+{% endblock %}

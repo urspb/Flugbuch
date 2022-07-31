@@ -1,0 +1,18 @@
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/timepicker@1.13.18/jquery.timepicker.min.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/timepicker@1.13.18/jquery.timepicker.min.js"></script>
+
+
+  <script type="text/javascript">
+    $(function () {$('#datepick').timepicker({
+            'scrollDefault': 'now',
+            timeFormat: 'H:i',
+            show2400: true,
+            minTime: '09:00',
+            maxTime: '{{ sunset }}',
+            step: 10,
+            forceRoundTime: true,
+            {#dropdown: true,#}
+            {#scrollbar: true#}
+        }).css("width", "5em");
+    });
+  </script>
