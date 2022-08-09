@@ -31,6 +31,9 @@ Dann kann ein erster Test unternommen werden mit dem Befehl:
 
 Unter der URL `http://127.0.0.1:5000/` kann dann ein erster Test von _Flugbuch_ erfolgen. Je nachdem ob der angemeldete Nutzer Vorstand ist, oder nicht, taucht der Menüpunkt _Berichte_ auf, oder eben nicht.
 
+## Hinweis zur Datenbank
+Die Email-Adressen in der Tabelle `USER` müssen klein geschrieben werden!
+
 # _Flugbuch_ unter Docker
 _Flugbuch_ kann in einem Docker-Container betrieben werden. Das hierfür notwendige Dockerfile ist im Wurzelverzeichnis zu finden.
 
