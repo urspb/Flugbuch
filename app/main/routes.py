@@ -343,9 +343,14 @@ def reportlist():
     repDates = []
     from sqlalchemy import text
     sql = text("select  strftime('%Y-%m-%d', start) day, count(DISTINCT user_id) pilots from pilot_log group by strftime('%Y-%m-%d', start) order by 1 desc ;")
+
+    sql = text("select strftime('%Y-%m-%d', start) day \
+     , count(DISTINCT user_id) pilots \
+     , (select count(*) from post where strftime('%Y-%m-%d', timestamp) = strftime('%Y-%m-%d', start)) posts \
+    from pilot_log group by strftime('%Y-%m-%d', start) order by 1 desc")
     result = db.engine.execute(sql)
     for r in result:
-        repDates.append({"day": r.day, "pltanz": r.pilots})
+        repDates.append({"day": r.day, "pltanz": r.pilots, "pstanz": r.posts})
         # print(r.day)
     return render_template('reportlist.html', days=repDates)
 
