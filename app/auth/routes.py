@@ -15,9 +15,10 @@ def login():
         return redirect(url_for('main.index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        lowerEmail = str.lower(form.email.data)
+        user = User.query.filter_by(email=lowerEmail).first()
         if user is None or user.password_hash is None or not user.check_password(form.password.data):
-            flash(_(f'Falsche email "{form.email.data}" oder Passwort "{form.password.data}"'))
+            flash(_(f'Falsche email "{lowerEmail}" oder Passwort "{form.password.data}"'))
             return redirect(url_for('auth.login'))
         login_user(user, remember=form.remember_me.data)
         next_page = request.args.get('next')
@@ -55,7 +56,8 @@ def reset_password_request():
         return redirect(url_for('main.index'))
     form = ResetPasswordRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        lowerEmail = str.lower(form.email.data)
+        user = User.query.filter_by(email=lowerEmail).first()
         if user:
             send_password_reset_email(user)
         flash(
