@@ -29,7 +29,7 @@
                     <li><a href="{{ url_for('main.logoffPilot') }}">{{ _('Geht') }}</a></li>
                     <li><a href="{{ url_for('main.meldung') }}">{{ _('Meldung') }}</a></li>
                     {% if current_user.ist_vorstand %}
-                    <li><a href="{{ url_for('main.reportlist') }}">{{ _('Berichte') }}</a></li>
+                    <li><a href="{{ url_for('main.reportlistPaginated') }}">{{ _('Berichte') }}</a></li>
                     {% endif %}
                 </ul>
                 {% if g.search_form %}

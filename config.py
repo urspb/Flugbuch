@@ -25,6 +25,7 @@ class Config(object):
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
     POSTS_PER_PAGE = 25
+    REPORTS_PER_PAGE = 21
     FB_VERSION = '0.5.1'
 
     LOC_TZ = 'Europe/Berlin'

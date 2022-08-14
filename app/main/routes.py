@@ -340,6 +340,9 @@ def explore():
 
 @bp.route('/reportlist')
 def reportlist():
+    if not current_user.is_authenticated or current_user.is_authenticated and current_user.ist_vorstand == None:
+        abort(403)  # Forbidden
+
     repDates = []
     from sqlalchemy import text
     sql = text("select  strftime('%Y-%m-%d', start) day, count(DISTINCT user_id) pilots from pilot_log group by strftime('%Y-%m-%d', start) order by 1 desc ;")
@@ -353,6 +356,50 @@ def reportlist():
         repDates.append({"day": r.day, "pltanz": r.pilots, "pstanz": r.posts})
         # print(r.day)
     return render_template('reportlist.html', days=repDates)
+
+
+@bp.route('/reportlistPaginated')
+def reportlistPaginated():
+    if not current_user.is_authenticated or current_user.is_authenticated and current_user.ist_vorstand == None:
+        abort(403)  # Forbidden
+
+    page = request.args.get('page', 1, type=int)
+    endDate = date.today() - (page-1) * timedelta(days=current_app.config['REPORTS_PER_PAGE'])
+    startDate = endDate - timedelta(days=current_app.config['REPORTS_PER_PAGE'])
+
+    odResult = db.engine.execute("select min(start) from pilot_log")
+    oldestReportDate = [row[0] for row in odResult][0]
+    if page > 1:
+      prev_page = page-1
+      prev_url = url_for('main.reportlistPaginated', page=prev_page)
+    else:
+      prev_url = None
+    print(f"date.strftime(startDate,'%Y-%m-%d') '{date.strftime(startDate,'%Y-%m-%d')}' > oldestReportDate '{oldestReportDate}'")
+    if date.strftime(startDate,'%Y-%m-%d') > oldestReportDate:
+      next_page = page +1
+      next_url = url_for('main.reportlistPaginated', page=next_page)
+    else:
+      next_url = None
+
+    def getReportList(endDate=date.today(),startDate='2022-07-01'):
+      repDates = []
+      from sqlalchemy import text
+      sql = text("select  strftime('%Y-%m-%d', start) day, count(DISTINCT user_id) pilots from pilot_log group by strftime('%Y-%m-%d', start) order by 1 desc ;")
+
+      sql = text(f"select strftime('%Y-%m-%d', start) day \
+       , count(DISTINCT user_id) pilots \
+       , (select count(*) from post where strftime('%Y-%m-%d', timestamp) = strftime('%Y-%m-%d', start)) posts \
+      from pilot_log \
+      where strftime('%Y-%m-%d', start) >= '{startDate}'\
+      and strftime('%Y-%m-%d', start) <= '{endDate}'\
+      group by strftime('%Y-%m-%d', start) order by 1 desc")
+      result = db.engine.execute(sql)
+      for r in result:
+          repDates.append({"day": r.day, "pltanz": r.pilots, "pstanz": r.posts})
+          # print(r.day)
+      return repDates
+
+    return render_template('reportlistPag.html', days=getReportList(endDate,startDate), next_url=next_url, prev_url=prev_url)
 
 @bp.route('/report_md/<day>')
 @bp.route('/report/<day>')
