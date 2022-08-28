@@ -1,6 +1,6 @@
 # Erster Start
 
-**Vorbemerkung:** Um die in diesem Abschnitt aufgeführten Befehle erfolgreich auszuführen, müssen diese im Wurzelverzeichnis des Projektes ausgeführt werden. Im Wurzelverzeichnis befindet sich u.a. die Datei `app.py`
+**Vorbemerkung:** Um die in diesem Abschnitt aufgeführten Befehle erfolgreich auszuführen, müssen diese im Wurzelverzeichnis des Projektes ausgeführt werden. Im Wurzelverzeichnis befindet sich u.a. die Datei `flugbuch.py`
 
 ## Erste Vorbereitungen
 Voraussetzung für den Betrieb von Flugbuch ist eine funktionierende Python3-Installation (z.B. Python 3.8.10). Zudem müssen die Pakete installiert sein, die in der Datei `requirements.txt` aufgelistet sind. **Wer nicht weiß, wie das geht, sollte an dieser Stelle aufhören** und die Finger von _Flugbuch_ lassen.
