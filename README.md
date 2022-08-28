@@ -19,7 +19,7 @@ _Flugbuch_...
 ## ... und was ist es nicht?
 _Flugbuch_...
 * ist keine eierlegende Wollmillchsau und wird es hoffentlich auch nie sein wollen
-* ist nichts für Menschen, die denken, sie wären IT-Experten, weil es ihnen schon einmal gelungen ist, ein Bild auf der Homepage ihres Vereins einzufügen.
+* sollte besser nicht von Menschen installiert, administriert und betrieben werden, die denken, sie wären IT-Experten, weil es ihnen schon einmal gelungen ist, ein Bild auf der Homepage ihres Vereins einzufügen.
 * verfügt (derzeit) über keine Benutzerverwaltung, da sich nach dem Anlegen der Benutzer in der Regel nur äußerst selten etwas ändert. Änderungen der Benutzereinträge können sehr einfach direkt in der Datenbank vorgenommen werden, sofern man über die Kompetenz dafür verfügt ;-)
 
 ## Wie geht es weiter?
