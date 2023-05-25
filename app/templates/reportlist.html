@@ -1,26 +1,47 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-    <h1>Verfügbare Tagesberichte</h1>
-{% if days|count==0 %}
-    Noch keine Tagesberichte .
+    <h1>Tagesberichte aktueller und voriger Monat</h1>
+{% if ddata|count==0 %}
+    Keine Daten!
 {% else %}
-    <table  width="100pt" class="table table-sm">
+    <table  class="table table-sm">
         <tr>
             <th>Datum Tagesbericht  </th>
             <th>Anzahl Piloten  </th>
             <th>Anzahl Meldungen  </th>
         </tr>
-    {% for day in days %}
+    {% for row in ddata %}
         <tr>
             <td>
-                <a href="report/{{ day["day"] }} "  target="_blank">  {{ day["day"] }} </a>
+               <a href="report/{{ row["day"] }} "  target="_blank">  {{ row["day"] }} </a>
             </td>
             <td>
-               {{ day["pltanz"] }}
+               {{ row["pltanz"] }}
             </td>
             <td>
-               {{ day["pstanz"] }}
+               {{ row["pstanz"] }}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+    <h1>Tagesberichte älterer Monate</h1>
+{% if mdata|count==0 %}
+    Keine Daten!
+{% else %}
+    <table  class="table table-sm">
+        <tr>
+            <th>Monat</th>
+            <th>Anzahl Anmeldungen</th>
+        </tr>
+    {% for row in mdata %}
+        <tr>
+            <td>
+               <a href="reportlistMonat/{{ row["monat"] }} "  target="_blank">  {{ row["monat"] }} </a>
+            </td>
+            <td>
+               {{ row["starts"] }}
             </td>
         </tr>
     {% endfor %}

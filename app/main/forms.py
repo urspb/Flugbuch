@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, current_app
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField, BooleanField
 from wtforms.validators import ValidationError, DataRequired, Length, Regexp
@@ -28,15 +28,17 @@ class EditProfileForm(FlaskForm):
   def __init__(self, id, *args, **kwargs):
     super(EditProfileForm, self).__init__(*args, **kwargs)
     self.id = id
+    current_app.logger.info(f'Sichtbarkeit für {self.first_name} = {self.sichtbar}')
     read_only(self.first_name)
     read_only(self.last_name)
     read_only(self.email)
 
   def validate_email(self, email):
-    if email.data != self.email:
-      user = User.query.filter_by(email=self.email.data).first()
-      if user is not None:
-        raise ValidationError(_('Please use a different email.'))
+    pass
+    # if email.data != self.email:
+    #   user = User.query.filter_by(email=self.email.data).first()
+    #   if user is not None:
+    #     raise ValidationError(_('Please use a different email.'))
 
 
 class EmptyForm(FlaskForm):
@@ -62,6 +64,10 @@ class MyDTPForm(FlaskForm):
   flugleiter = BooleanField(_l('als Flugleiter'))
   submit = SubmitField(_l('Submit'))
 
+class TestDateForm(FlaskForm):
+  dt = DateField('Datum wählen', format="%Y-%m-%d")
+class ReportList(FlaskForm):
+  dt = DateField('Datum wählen')
 
 class PostForm(FlaskForm):
   post = TextAreaField(_l('Meldung'), validators=[DataRequired()])

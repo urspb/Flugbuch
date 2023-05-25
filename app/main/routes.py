@@ -1,7 +1,10 @@
+import logging
+import math
 from datetime import datetime, timedelta, date
 
 from dateutil.tz import gettz
 import re
+import os
 
 from flask import render_template, flash, redirect, url_for, request, g, \
     jsonify, current_app, abort
@@ -11,9 +14,10 @@ from langdetect import detect, LangDetectException
 
 import app
 from app import db
-from app.main.forms import EditProfileForm, EmptyForm, PostForm, SearchForm, \
-    MessageForm, \
-    PilotKommt, PilotGeht, PilotIndex, MyDTPForm
+from app.main.forms import EditProfileForm, EmptyForm, PostForm, SearchForm \
+   , MessageForm \
+   , PilotKommt, PilotGeht, PilotIndex \
+   , MyDTPForm, TestDateForm
 
 from app.models import User, Post#, Message, Notification
 from app.models import PilotLog
@@ -314,15 +318,21 @@ def index():
                            form=form)
 
 
-@bp.route('/dtpick')
+@bp.route('/dpick')
 def dtpick():
-    # Test for timepicker
-    form = MyDTPForm()
-    tm = datetime.now()
-    tm = tm - timedelta(minutes=tm.minute % 10,
-                                 seconds=tm.second,
-                                 microseconds=tm.microsecond)
-    return render_template('tpTest.html', form=form, stime=tm)
+    # Test for Datepicker
+    form = TestDateForm()
+    dn = date.today()
+    return render_template('tpTest.html', form=form, dateValue=dn)
+
+@bp.route('/dtpick')
+def tpick():
+    # Test for Datepicker
+    form = TestDateForm()
+    dn = date.today()
+    if form.validate_on_submit():
+        return form.dt.data.strftime('%x')
+    return render_template('dptest2.html', form=form)
 
 @bp.route('/explore')
 @login_required
@@ -337,15 +347,75 @@ def explore():
     return render_template('index.html', title=_('Explore'),
                            posts=posts.items, next_url=next_url,
                            prev_url=prev_url)
-
 @bp.route('/reportlist')
 def reportlist():
     if not current_user.is_authenticated or current_user.is_authenticated and current_user.ist_vorstand == None:
         abort(403)  # Forbidden
 
+    from sqlalchemy import text
+    sql = text("""select strftime('%Y-%m-%d', start) day 
+                       , count(DISTINCT user_id) pilots 
+                       , (select count(*) from post where strftime('%Y-%m-%d', timestamp) = strftime('%Y-%m-%d', start)) posts 
+                    from pilot_log 
+                   where start >= date('now','start of month','-1 month') 
+                   group by strftime('%Y-%m-%d', start) 
+                   order by 1 desc
+               """)
+    result = db.engine.execute(sql)
+    # current_app.logger.info(f"result hat {len(result.all())} Einträge")
+    repDates = []
+    for r in result.all():
+        repDates.append({"day": r.day, "pltanz": r.pilots, "pstanz": r.posts})
+        # current_app.logger.info(r.day)
+
+    sql = text(
+      """select strftime('%Y-%m', start) monat, count(*) starts
+           from pilot_log
+          where start < date('now','start of month','-1 month') 
+          group by strftime('%Y-%m', start)
+          order by 1 desc;
+      """)
+    result = db.engine.execute(sql)
+    repMdata = []
+    for r in result:
+      repMdata.append({"monat": r.monat, "starts": r.starts})
+      # current_app.logger.info(r)
+
+    return render_template('reportlist.html', ddata=repDates, mdata=repMdata)
+
+@bp.route('/reportlistMonat/<monat>')
+
+def reportlistMonat(monat):
+    if not current_user.is_authenticated or current_user.is_authenticated and current_user.ist_vorstand == None:
+        abort(403)  # Forbidden
+
     repDates = []
     from sqlalchemy import text
-    sql = text("select  strftime('%Y-%m-%d', start) day, count(DISTINCT user_id) pilots from pilot_log group by strftime('%Y-%m-%d', start) order by 1 desc ;")
+    sql = text(
+      """select strftime('%Y-%m-%d', start) day 
+              , count(DISTINCT user_id) pilots 
+              , (select count(*) from post where strftime('%Y-%m-%d', timestamp) = strftime('%Y-%m-%d', start)) posts 
+           from pilot_log 
+          where strftime('%Y-%m', start) = :monat 
+          group by strftime('%Y-%m-%d', start) 
+          order by 1 desc
+      """)
+    result = db.engine.execute(sql, monat=monat)
+    # current_app.logger.info(f"result hat {len(result.all())} Einträge")
+    for r in result.all():
+        repDates.append({"day": r.day, "pltanz": r.pilots, "pstanz": r.posts})
+        current_app.logger.info(r.day)
+    return render_template('reportlistOld.html', days=repDates, monat=monat)
+
+
+@bp.route('/reportlist')
+def reportlistOld():
+    if not current_user.is_authenticated or current_user.is_authenticated and current_user.ist_vorstand == None:
+        abort(403)  # Forbidden
+
+    repDates = []
+    from sqlalchemy import text
+    # sql = text("select  strftime('%Y-%m-%d', start) day, count(DISTINCT user_id) pilots from pilot_log group by strftime('%Y-%m-%d', start) order by 1 desc ;")
 
     sql = text("select strftime('%Y-%m-%d', start) day \
      , count(DISTINCT user_id) pilots \
@@ -355,15 +425,35 @@ def reportlist():
     for r in result:
         repDates.append({"day": r.day, "pltanz": r.pilots, "pstanz": r.posts})
         # print(r.day)
-    return render_template('reportlist.html', days=repDates)
+    return render_template('reportlistOld.html', days=repDates)
 
 
-@bp.route('/reportlistPaginated')
+@bp.route('/reportlistPaginated', methods=['GET', 'POST'])
 def reportlistPaginated():
+    import os
     if not current_user.is_authenticated or current_user.is_authenticated and current_user.ist_vorstand == None:
-        abort(403)  # Forbidden
+      current_app.logger.error(current_user.__str__)
+      abort(403)  # Forbidden
 
-    page = request.args.get('page', 1, type=int)
+    # set Loglevel to DEBUG if FLASK_ENV == development
+    flaskEnv =  os.environ.get('FLASK_ENV') or 'undefined'
+    origLogLevel = current_app.logger.level
+    if flaskEnv == 'development':
+      current_app.logger.setLevel(logging.DEBUG)
+
+    form = TestDateForm()
+    if form.validate_on_submit():
+      current_app.logger.debug(form.dt.data.__str__())
+      days = date.today() - date.fromisoformat(form.dt.data.__str__())
+      current_app.logger.debug(f"days = {days}")
+      if days.total_seconds() > 0:
+        page = math.ceil(days.total_seconds()/3600/24 / current_app.config['REPORTS_PER_PAGE'])
+        current_app.logger.debug(f"page after calculation = {page}")
+      else:
+        page = 1
+    else:
+      page = request.args.get('page', 1, type=int)
+
     endDate = date.today() - (page-1) * timedelta(days=current_app.config['REPORTS_PER_PAGE'])
     startDate = endDate - timedelta(days=current_app.config['REPORTS_PER_PAGE'])
 
@@ -374,7 +464,7 @@ def reportlistPaginated():
       prev_url = url_for('main.reportlistPaginated', page=prev_page)
     else:
       prev_url = None
-    print(f"date.strftime(startDate,'%Y-%m-%d') '{date.strftime(startDate,'%Y-%m-%d')}' > oldestReportDate '{oldestReportDate}'")
+    current_app.logger.debug(f"date.strftime(startDate,'%Y-%m-%d') '{date.strftime(startDate,'%Y-%m-%d')}' > oldestReportDate '{oldestReportDate}'")
     if date.strftime(startDate,'%Y-%m-%d') > oldestReportDate:
       next_page = page +1
       next_url = url_for('main.reportlistPaginated', page=next_page)
@@ -399,7 +489,10 @@ def reportlistPaginated():
           # print(r.day)
       return repDates
 
-    return render_template('reportlistPag.html', days=getReportList(endDate,startDate), next_url=next_url, prev_url=prev_url)
+    # restore logLevel
+    current_app.logger.setLevel(origLogLevel)
+
+    return render_template('reportlistPag.html', form=form, days=getReportList(endDate,startDate), next_url=next_url, prev_url=prev_url)
 
 @bp.route('/report_md/<day>')
 @bp.route('/report/<day>')
@@ -411,7 +504,7 @@ def report(day):
 
     dayDate = datetime.strptime(day, '%Y-%m-%d')
     endday = sunset(dayDate)
-    print("endday = " + endday.isoformat(timespec='seconds'))
+    # print("endday = " + endday.isoformat(timespec='seconds'))
 
     # Aufbereitung PilotenLogs
     pLogs = PilotLog.query.filter(PilotLog.start >= dayDate).filter(PilotLog.start <= endday)\
@@ -426,8 +519,8 @@ def report(day):
         log.stop = log.stop.replace(tzinfo=gettz('UTC')).astimezone(gettz(current_app.config['LOC_TZ']))
       else:
           log.stop = tAbrund10(endday)
-          print(log.stop)
-          print(endday)
+          # print(log.stop)
+          # print(endday)
       if log.stop > log.start:
           pLogs2.append(log)
 
@@ -486,20 +579,29 @@ def user(user_id):
 @bp.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
+    # set Loglevel to DEBUG if FLASK_ENV == development
+    flaskEnv =  os.environ.get('FLASK_ENV') or 'undefined'
+    origLogLevel = current_app.logger.level
+    if flaskEnv == 'development':
+      current_app.logger.setLevel(logging.DEBUG)
+
     form = EditProfileForm(current_user.id)
     if form.validate_on_submit():
+        # current_app.logger.info(f'Sichtbarkeit in validate_on_submit() für {current_user.first_name} = {current_user.sichtbar}')
         current_user.about_me = form.about_me.data
         current_user.sichtbar = form.sichtbar.data
         db.session.commit()
         flash(_('Die Änderungen wurden gespeichert.'))
         return redirect(url_for('main.edit_profile'))
     elif request.method == 'GET':
-        # form.username.data = current_user.username
         form.about_me.data = current_user.about_me
         form.first_name.data = current_user.first_name
         form.last_name.data = current_user.last_name
         form.email.data = current_user.email
         form.sichtbar.data = current_user.sichtbar
+
+    # restore logLevel
+    current_app.logger.setLevel(origLogLevel)
 
     return render_template('edit_profile.html', title=_('Edit Profile'),
                            form=form)

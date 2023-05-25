@@ -28,6 +28,7 @@
     <table class="fixed">
     <col width="120px" />
     <col width="130px" />
+    <col width="230px" />
     <tr><td>
     {% if prev_url %}
     <a href="{{ prev_url }}">jüngere Tagesberichte</a>
@@ -37,7 +38,37 @@
     {% if next_url %}
     <a href="{{ next_url }}">ältere Tagesberichte</a>
     {% endif %}
-        </td></tr>
+        </td><td>
+{#        <div id="date-picker-example" class="md-form md-outline input-with-post-icon datepicker" inline="true">#}
+{#  <input placeholder="Select date" type="text" id="example" class="form-control">#}
+{#  <label for="example">Bericht vom:</label>#}
+{#  <i class="fas fa-calendar input-prefix"></i>#}
+{#</div>#}
+
+
+    {% block scripts %}
+        {{ super() }}
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script type="text/javascript" src="/scripts/jquery.ui.datepicker-de.js"></script>
+
+  <script type="text/javascript">
+	$(function() {
+        {#$( ".dtpick" ).datepicker.setDefaults($.datepicker.regional["de"]);#}
+        {#$.datepicker.setDefaults($.datepicker.regional['de']);#}
+		$( ".dtpick" ).datepicker({dateFormat: 'yy-mm-dd'});
+		{#$( ".dtpick" ).datepicker();#}
+	}).css("width", "5em");
+    </script>
+    {% endblock %}
+    <form method="post" action="">
+        {{ form.hidden_tag() }}
+        {{ form.dt(class="dtpick") }}
+        <button type="submit">Anzeigen</button>
+    </form>
+    </td>
+    </tr>
     </table>
 {% endif %}
 {% endblock %}

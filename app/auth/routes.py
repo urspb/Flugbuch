@@ -8,6 +8,7 @@ from app.auth.forms import LoginForm, RegistrationForm, \
     ResetPasswordRequestForm, ResetPasswordForm
 from app.models import User
 from app.auth.email import send_password_reset_email
+from sqlalchemy import func
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -16,7 +17,8 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         lowerEmail = str.lower(form.email.data)
-        user = User.query.filter_by(email=lowerEmail).first()
+        # user = User.query.filter_by(email=lowerEmail).first()
+        user = User.query.filter(func.lower(User.email) == lowerEmail).first()
         if user is None or user.password_hash is None or not user.check_password(form.password.data):
             flash(_(f'Falsche email "{lowerEmail}" oder Passwort "{form.password.data}"'))
             return redirect(url_for('auth.login'))

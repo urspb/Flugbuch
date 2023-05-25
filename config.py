@@ -20,13 +20,13 @@ class Config(object):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = [os.environ.get('MAIL_USERNAME')]
-    LANGUAGES = ['en', 'es', 'de']
+    LANGUAGES = ['de','en', 'es']
     MS_TRANSLATOR_KEY = os.environ.get('MS_TRANSLATOR_KEY')
     ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL')
     REDIS_URL = os.environ.get('REDIS_URL') or 'redis://'
     POSTS_PER_PAGE = 25
     REPORTS_PER_PAGE = 21
-    FB_VERSION = '0.5.1'
+    FB_VERSION = '0.5.5'
 
     LOC_TZ = 'Europe/Berlin'
     LATITUDE = 51.67642
