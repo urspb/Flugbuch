@@ -405,7 +405,7 @@ def reportlistMonat(monat):
     for r in result.all():
         repDates.append({"day": r.day, "pltanz": r.pilots, "pstanz": r.posts})
         current_app.logger.info(r.day)
-    return render_template('reportlistOld.html', days=repDates, monat=monat)
+    return render_template('reportlistMonat.html', days=repDates, monat=monat)
 
 
 @bp.route('/reportlist')
@@ -425,7 +425,7 @@ def reportlistOld():
     for r in result:
         repDates.append({"day": r.day, "pltanz": r.pilots, "pstanz": r.posts})
         # print(r.day)
-    return render_template('reportlistOld.html', days=repDates)
+    return render_template('reportlistMonat.html', days=repDates)
 
 
 @bp.route('/reportlistPaginated', methods=['GET', 'POST'])
